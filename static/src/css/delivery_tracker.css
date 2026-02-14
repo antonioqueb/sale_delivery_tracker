@@ -1,28 +1,38 @@
 /* =============================================
-   DELIVERY TRACKER — TABLE VIEW (Full Viewport)
+   DELIVERY TRACKER — TABLE VIEW (Full Width)
+   
+   DOM hierarchy (from real Odoo 19):
+   .o_form_renderer.d-flex
+     └─ .o_form_sheet_bg (flex child, shares row with chatter)
+         ├─ .o_form_statusbar
+         ├─ .o_form_sheet (has max-width ~1200px, centered)
+         ├─ .dt-outer-wrap  ← our widget (after sheet)
+         └─ ...
+     └─ .o-mail-ChatterContainer (flex child, side panel)
+   
+   The sheet has max-width but dt-outer-wrap does NOT inherit it
+   since it's a sibling, not a child. The real constraint is
+   .o_form_sheet_bg's padding.
    ============================================= */
 
-/*
- * The widget lives outside <sheet> but Odoo's .o_form_renderer
- * and .o_content still constrain width. We use the viewport-width
- * technique to break out of ANY parent container.
- */
-
-/* --- Outer wrap: break out of all Odoo containers --- */
+/* --- Force dt-outer-wrap to span full width of sheet_bg --- */
 .dt-outer-wrap {
-    width: 100vw;
-    position: relative;
-    left: 50%;
-    right: 50%;
-    margin-left: -50vw;
-    margin-right: -50vw;
-    overflow-x: hidden;
+    width: auto;
+    margin-left: -24px;
+    margin-right: -24px;
+    padding: 0;
+}
+
+/* Also handle when sheet_bg has different padding */
+.o_form_sheet_bg > .dt-outer-wrap {
+    margin-left: calc(-1 * var(--o-form-gap, 24px));
+    margin-right: calc(-1 * var(--o-form-gap, 24px));
 }
 
 /* --- Wrapper --- */
 .dt-wrapper {
-    margin-top: 16px;
-    margin-bottom: 12px;
+    margin-top: 4px;
+    margin-bottom: 0;
     width: 100%;
     background: #fff;
     border-top: 1px solid #dee2e6;
@@ -41,7 +51,7 @@
     border: 1px dashed #dde1e6;
     border-radius: 8px;
     background: #fafbfc;
-    margin: 0 24px;
+    margin: 0 24px 12px;
 }
 .dt-empty i { font-size: 1.3rem; color: #bdbdbd; }
 
@@ -83,7 +93,7 @@
 .chip-draft { background: #f5f5f5; color: #757575; }
 .chip-draft .dt-chip-dot { background: #9e9e9e; }
 
-/* --- Table Container: edge to edge --- */
+/* --- Table Container --- */
 .dt-table-container {
     width: 100%;
     background: #fff;
@@ -362,18 +372,22 @@
    RESPONSIVE
    ========================== */
 @media (max-width: 768px) {
+    .dt-outer-wrap {
+        margin-left: -16px;
+        margin-right: -16px;
+    }
     .dt-header {
         flex-direction: column;
         gap: 8px;
         align-items: flex-start;
-        padding: 0 12px 10px 12px;
+        padding: 0 16px 10px 16px;
     }
     .dt-table-container { overflow-x: auto; }
     .dt-th-progress, .dt-td-progress { display: none; }
     .dt-th-type, .dt-td-type { display: none; }
     .dt-table thead th:first-child,
-    .dt-table tbody td:first-child { padding-left: 12px; }
+    .dt-table tbody td:first-child { padding-left: 16px; }
     .dt-table thead th:last-child,
-    .dt-table tbody td:last-child { padding-right: 12px; }
-    .dt-empty { margin: 0 12px; }
+    .dt-table tbody td:last-child { padding-right: 16px; }
+    .dt-empty { margin: 0 16px 12px; }
 }
