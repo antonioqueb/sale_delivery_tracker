@@ -27,34 +27,55 @@ class SaleOrder(models.Model):
         for order in self:
             pickings = order.picking_ids.filtered(lambda p: p.state != 'cancel')
             if not pickings:
-                order.delivery_tracker_data = json.dumps([])
+                order.delivery_tracker_data = json.dumps({
+                    'lines': [],
+                    'summary': {
+                        'total': 0,
+                        'done': 0,
+                        'active': 0,
+                        'draft': 0,
+                        'all_done': False,
+                    },
+                })
                 order.delivery_tracker_summary = ''
                 continue
 
             tracker_lines = order._get_tracker_lines(pickings)
-            order.delivery_tracker_data = json.dumps(tracker_lines)
+            summary_data = order._get_summary_data(tracker_lines)
+            order.delivery_tracker_data = json.dumps({
+                'lines': tracker_lines,
+                'summary': summary_data,
+            })
             order.delivery_tracker_summary = order._get_summary_text(tracker_lines)
+
+    def _get_summary_data(self, tracker_lines):
+        done = len([l for l in tracker_lines if l['state'] == 'done'])
+        active = len([l for l in tracker_lines if l['state'] in ('assigned', 'confirmed', 'waiting')])
+        draft = len([l for l in tracker_lines if l['state'] == 'draft'])
+        total = len(tracker_lines)
+        return {
+            'total': total,
+            'done': done,
+            'active': active,
+            'draft': draft,
+            'all_done': done == total and total > 0,
+        }
 
     def _get_tracker_lines(self, pickings):
         """
         Core logic: For each delivery flow, only show the LAST document.
-        
+
         A "flow" is a chain of pickings linked by move_dest_ids/move_orig_ids.
         For each chain, we only show the most advanced picking (the one closest
         to the customer). If a picking is fully transferred and its moves have
         all been consumed by a next-step picking, we skip it and show the next one.
-        
+
         For partial deliveries, we show:
         - The last document in each completed/in-progress chain
         - Any pending picking that still has remaining qty to process
         """
-        # Build chains: group pickings by their flow
-        # A chain is: pick -> pack -> ship (or any subset)
-        # We want the "leaf" pickings - those whose moves don't feed into another picking
-        # OR those that still have pending quantities
-
         all_moves = pickings.mapped('move_ids').filtered(lambda m: m.state != 'cancel')
-        
+
         # Build a map of picking -> next pickings (via move_dest_ids)
         picking_next = {}
         for picking in pickings:
@@ -65,13 +86,9 @@ class SaleOrder(models.Model):
                         next_pickings |= dest_move.picking_id
             picking_next[picking.id] = next_pickings
 
-        # Find "leaf" pickings per flow: pickings that have no next picking,
-        # OR pickings where not all qty has been consumed by next step
         result = []
         shown_picking_ids = set()
 
-        # Strategy: walk from the end (outgoing/customer pickings) backwards
-        # Sort pickings by sequence/type to process outgoing first
         sorted_pickings = pickings.sorted(
             key=lambda p: (
                 0 if p.picking_type_id.code == 'outgoing' else
@@ -84,12 +101,9 @@ class SaleOrder(models.Model):
             if picking.id in shown_picking_ids:
                 continue
 
-            # Check if this picking has a "next" picking that already handles its qty
             next_picks = picking_next.get(picking.id, self.env['stock.picking'])
-            
+
             if picking.state == 'done' and next_picks:
-                # This picking is done and has a next step
-                # Check if ALL its quantity was consumed by next pickings
                 fully_consumed = True
                 for move in picking.move_ids.filtered(lambda m: m.state != 'cancel'):
                     dest_moves = move.move_dest_ids.filtered(
@@ -98,24 +112,18 @@ class SaleOrder(models.Model):
                     if not dest_moves:
                         fully_consumed = False
                         break
-                    # Check if destination moves account for the full qty
                     dest_qty = sum(dest_moves.mapped('product_uom_qty'))
                     if dest_qty < move.quantity:
                         fully_consumed = False
                         break
 
                 if fully_consumed:
-                    # Skip this picking, show the next ones instead
                     for np in next_picks:
                         shown_picking_ids.add(np.id)
                         result.append(self._picking_to_tracker_line(np))
                     shown_picking_ids.add(picking.id)
                     continue
 
-            # This picking is either:
-            # - A leaf (no next picking)
-            # - Partially consumed (show it for remaining qty)
-            # - Not yet done
             if picking.id not in shown_picking_ids:
                 shown_picking_ids.add(picking.id)
                 result.append(self._picking_to_tracker_line(picking))
@@ -138,7 +146,6 @@ class SaleOrder(models.Model):
 
     def _picking_to_tracker_line(self, picking):
         """Convert a picking to a tracker line dict for the widget."""
-        # Calculate quantities
         total_demand = sum(picking.move_ids.filtered(
             lambda m: m.state != 'cancel'
         ).mapped('product_uom_qty'))
@@ -146,12 +153,10 @@ class SaleOrder(models.Model):
             lambda m: m.state != 'cancel'
         ).mapped('quantity'))
 
-        # Determine stage label
         picking_type = picking.picking_type_id
         stage_label = picking_type.name or 'Transfer'
         type_code = picking_type.code or 'internal'
 
-        # State mapping for display
         state_map = {
             'draft': {'label': 'Borrador', 'color': 'secondary'},
             'waiting': {'label': 'En espera', 'color': 'warning'},
@@ -161,14 +166,12 @@ class SaleOrder(models.Model):
         }
         state_info = state_map.get(picking.state, {'label': picking.state, 'color': 'secondary'})
 
-        # Progress percentage
         progress = 0
         if total_demand > 0:
             progress = round((total_done / total_demand) * 100, 1)
         if picking.state == 'done':
             progress = 100
 
-        # Icon based on type
         icon_map = {
             'internal': 'fa-exchange',
             'outgoing': 'fa-truck',
@@ -176,14 +179,20 @@ class SaleOrder(models.Model):
         }
         icon = icon_map.get(type_code, 'fa-box')
 
-        # Product details
         products = []
         for move in picking.move_ids.filtered(lambda m: m.state != 'cancel'):
+            prod_progress = 0
+            if move.product_uom_qty > 0:
+                prod_progress = round((move.quantity / move.product_uom_qty) * 100, 1)
+            if move.state == 'done':
+                prod_progress = 100
+
             products.append({
-                'product': move.product_id.display_name,
+                'name': move.product_id.display_name,
                 'demand': move.product_uom_qty,
                 'done': move.quantity,
                 'uom': move.product_uom.name,
+                'progress': prod_progress,
             })
 
         return {
@@ -208,13 +217,13 @@ class SaleOrder(models.Model):
         """Generate a human-readable summary."""
         if not tracker_lines:
             return 'Sin entregas'
-        
+
         done_count = len([l for l in tracker_lines if l['state'] == 'done'])
         total = len(tracker_lines)
-        
+
         if done_count == total:
             return f'✓ {total} entrega(s) completada(s)'
-        
+
         in_progress = len([l for l in tracker_lines if l['state'] in ('assigned', 'confirmed', 'waiting')])
         parts = []
         if done_count:
@@ -224,5 +233,5 @@ class SaleOrder(models.Model):
         pending = total - done_count - in_progress
         if pending:
             parts.append(f'{pending} pendiente(s)')
-        
+
         return ' | '.join(parts)
