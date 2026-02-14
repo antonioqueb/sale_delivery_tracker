@@ -1,12 +1,22 @@
 /* =============================================
-   DELIVERY TRACKER — TABLE VIEW (Full Width)
+   DELIVERY TRACKER — TABLE VIEW (Full Viewport)
    ============================================= */
 
-/* --- Outer wrap: lives OUTSIDE the sheet, full width --- */
+/*
+ * The widget lives outside <sheet> but Odoo's .o_form_renderer
+ * and .o_content still constrain width. We use the viewport-width
+ * technique to break out of ANY parent container.
+ */
+
+/* --- Outer wrap: break out of all Odoo containers --- */
 .dt-outer-wrap {
-    width: 100%;
-    padding: 0;
-    margin: 0;
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+    overflow-x: hidden;
 }
 
 /* --- Wrapper --- */
@@ -14,6 +24,9 @@
     margin-top: 16px;
     margin-bottom: 12px;
     width: 100%;
+    background: #fff;
+    border-top: 1px solid #dee2e6;
+    padding-top: 12px;
 }
 
 /* --- Empty --- */
