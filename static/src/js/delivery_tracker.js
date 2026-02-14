@@ -5,21 +5,22 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 
-// ============================================
-// DELIVERY TRACKER WIDGET (full cards view)
-// ============================================
-
 class DeliveryTrackerWidget extends Component {
     static template = "sale_delivery_tracker.DeliveryTrackerWidget";
     static props = { ...standardFieldProps };
 
     setup() {
         this.actionService = useService("action");
+        const parsed = this._parseData(this.props.record.data[this.props.name]);
         this.state = useState({
-            lines: this._parseData(this.props.record.data[this.props.name]),
+            lines: parsed,
+            summaryParts: this._buildSummary(parsed),
+            expandedRows: {},
         });
         onWillUpdateProps((nextProps) => {
-            this.state.lines = this._parseData(nextProps.record.data[nextProps.name]);
+            const data = this._parseData(nextProps.record.data[nextProps.name]);
+            this.state.lines = data;
+            this.state.summaryParts = this._buildSummary(data);
         });
     }
 
@@ -32,10 +33,24 @@ class DeliveryTrackerWidget extends Component {
         }
     }
 
-    getProgressClass(line) {
-        if (line.state === 'done') return 'fill-success';
-        if (line.state === 'assigned') return 'fill-primary';
-        return 'fill-warning';
+    _buildSummary(lines) {
+        if (!lines.length) return [];
+        const done = lines.filter(l => l.state === 'done').length;
+        const inProgress = lines.filter(l => ['assigned', 'confirmed', 'waiting'].includes(l.state)).length;
+        const draft = lines.filter(l => l.state === 'draft').length;
+        const parts = [];
+        if (done) parts.push({ count: done, label: 'completada(s)', cls: 'chip-done' });
+        if (inProgress) parts.push({ count: inProgress, label: 'en proceso', cls: 'chip-progress' });
+        if (draft) parts.push({ count: draft, label: 'borrador', cls: 'chip-draft' });
+        return parts;
+    }
+
+    toggleExpand(lineId) {
+        this.state.expandedRows[lineId] = !this.state.expandedRows[lineId];
+    }
+
+    isExpanded(lineId) {
+        return !!this.state.expandedRows[lineId];
     }
 
     async onClickPicking(pickingId) {
@@ -49,45 +64,6 @@ class DeliveryTrackerWidget extends Component {
     }
 }
 
-
-// ============================================
-// DELIVERY SUMMARY BADGE (header indicator)
-// ============================================
-
-class DeliverySummaryBadge extends Component {
-    static template = "sale_delivery_tracker.DeliverySummaryBadge";
-    static props = { ...standardFieldProps };
-
-    setup() {
-        this.state = useState({
-            summary: this.props.record.data[this.props.name] || '',
-        });
-        onWillUpdateProps((nextProps) => {
-            this.state.summary = nextProps.record.data[nextProps.name] || '';
-        });
-    }
-
-    get badgeClass() {
-        const s = this.state.summary;
-        if (!s || s === 'Sin entregas') return 'summary-empty';
-        if (s.startsWith('✓')) return 'summary-done';
-        return 'summary-progress';
-    }
-
-    get badgeIcon() {
-        const s = this.state.summary;
-        if (!s || s === 'Sin entregas') return 'fa-clock-o';
-        if (s.startsWith('✓')) return 'fa-check-circle';
-        return 'fa-spinner fa-pulse';
-    }
-}
-
-
-// Register widgets
 registry.category("fields").add("delivery_tracker_widget", {
     component: DeliveryTrackerWidget,
-});
-
-registry.category("fields").add("delivery_summary_badge", {
-    component: DeliverySummaryBadge,
 });

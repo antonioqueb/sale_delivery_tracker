@@ -1,24 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- Sale Order Form: Add Delivery Tracker -->
     <record id="view_order_form_delivery_tracker" model="ir.ui.view">
         <field name="name">sale.order.form.delivery.tracker</field>
         <field name="model">sale.order</field>
         <field name="inherit_id" ref="sale.view_order_form"/>
         <field name="priority">50</field>
         <field name="arch" type="xml">
-            <!-- Add the tracker widget after the order lines notebook -->
-            <xpath expr="//notebook" position="inside">
-                <page string="📦 Seguimiento de Entregas" name="delivery_tracker">
-                    <field name="delivery_tracker_data" widget="delivery_tracker_widget" nolabel="1"/>
-                </page>
-            </xpath>
-            <!-- Add a visible status badge in the header area -->
-            <xpath expr="//field[@name='partner_id']" position="before">
-                <div class="d-flex align-items-center mb-2">
-                    <field name="delivery_tracker_summary" widget="delivery_summary_badge" nolabel="1"/>
-                </div>
+            <xpath expr="//notebook" position="after">
+                <field name="delivery_tracker_data" widget="delivery_tracker_widget" nolabel="1"/>
             </xpath>
         </field>
     </record>
