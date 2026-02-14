@@ -8,7 +8,9 @@
         <field name="priority">50</field>
         <field name="arch" type="xml">
             <xpath expr="//notebook" position="after">
-                <field name="delivery_tracker_data" widget="delivery_tracker_widget" nolabel="1"/>
+                <div class="o_group" style="width: 100%;">
+                    <field name="delivery_tracker_data" widget="delivery_tracker_widget" nolabel="1"/>
+                </div>
             </xpath>
         </field>
     </record>
