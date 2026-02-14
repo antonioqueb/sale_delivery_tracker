@@ -1,303 +1,366 @@
-/* ============================================
-   SALE DELIVERY TRACKER - Main Styles
-   ============================================ */
+/* =============================================
+   DELIVERY TRACKER — TABLE VIEW (Full Width)
+   ============================================= */
 
-.delivery-tracker-container {
-    padding: 16px;
-    background: #fafbfc;
-    border-radius: 8px;
-}
-
-.delivery-tracker-empty {
-    text-align: center;
-    padding: 40px 20px;
-    color: #868e96;
-}
-
-.delivery-tracker-empty i {
-    font-size: 48px;
-    margin-bottom: 12px;
-    opacity: 0.4;
-}
-
-.delivery-tracker-empty p {
-    font-size: 14px;
+/* --- Outer wrap: lives OUTSIDE the sheet, full width --- */
+.dt-outer-wrap {
+    width: 100%;
+    padding: 0;
     margin: 0;
 }
 
-/* --- Card Grid --- */
-.delivery-tracker-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-    gap: 16px;
+/* --- Wrapper --- */
+.dt-wrapper {
+    margin-top: 16px;
+    margin-bottom: 12px;
+    width: 100%;
 }
 
-/* --- Individual Card --- */
-.delivery-card {
-    background: white;
-    border-radius: 10px;
-    border: 1px solid #e9ecef;
-    overflow: hidden;
-    transition: box-shadow 0.2s ease, transform 0.15s ease;
-    cursor: pointer;
-}
-
-.delivery-card:hover {
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-    transform: translateY(-2px);
-}
-
-/* State border top accent */
-.delivery-card.state-done {
-    border-top: 3px solid #28a745;
-}
-
-.delivery-card.state-assigned {
-    border-top: 3px solid #007bff;
-}
-
-.delivery-card.state-confirmed,
-.delivery-card.state-waiting {
-    border-top: 3px solid #ffc107;
-}
-
-.delivery-card.state-draft {
-    border-top: 3px solid #6c757d;
-}
-
-/* --- Card Header --- */
-.delivery-card-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 16px 10px;
-}
-
-.delivery-card-header-left {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.delivery-card-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
+/* --- Empty --- */
+.dt-empty {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 16px;
-    color: white;
+    gap: 10px;
+    padding: 24px 16px;
+    color: #9e9e9e;
+    font-size: 0.88rem;
+    border: 1px dashed #dde1e6;
+    border-radius: 8px;
+    background: #fafbfc;
+    margin: 0 24px;
+}
+.dt-empty i { font-size: 1.3rem; color: #bdbdbd; }
+
+/* --- Header --- */
+.dt-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px 10px 24px;
+}
+.dt-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 0.92rem;
+    color: #343a40;
+}
+.dt-title i { color: #6c757d; }
+
+.dt-chips { display: flex; gap: 6px; }
+.dt-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 0.73rem;
+    font-weight: 500;
+}
+.dt-chip-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+}
+.chip-done { background: #e8f5e9; color: #2e7d32; }
+.chip-done .dt-chip-dot { background: #43a047; }
+.chip-progress { background: #e3f2fd; color: #1565c0; }
+.chip-progress .dt-chip-dot { background: #1e88e5; }
+.chip-draft { background: #f5f5f5; color: #757575; }
+.chip-draft .dt-chip-dot { background: #9e9e9e; }
+
+/* --- Table Container: edge to edge --- */
+.dt-table-container {
+    width: 100%;
+    background: #fff;
+    border-top: 1px solid #e0e4e8;
+    border-bottom: 1px solid #e0e4e8;
+    overflow-x: auto;
+}
+
+/* --- Table --- */
+.dt-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    table-layout: auto;
+}
+
+/* Thead */
+.dt-table thead {
+    background: #f5f6f8;
+    border-bottom: 2px solid #e0e4e8;
+}
+.dt-table thead th {
+    padding: 8px 12px;
+    font-weight: 600;
+    font-size: 0.72rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    text-align: left;
+}
+.dt-table thead th:first-child { padding-left: 24px; }
+.dt-table thead th:last-child { padding-right: 24px; }
+
+/* Tbody */
+.dt-table tbody tr {
+    border-bottom: 1px solid #f0f2f4;
+    transition: background 0.12s;
+}
+.dt-table tbody tr:last-child { border-bottom: none; }
+.dt-table tbody td {
+    padding: 7px 12px;
+    vertical-align: middle;
+    color: #343a40;
+}
+.dt-table tbody td:first-child { padding-left: 24px; }
+.dt-table tbody td:last-child { padding-right: 24px; }
+
+/* --- State left accent --- */
+.dt-state-done > td:first-child { box-shadow: inset 3px 0 0 #43a047; }
+.dt-state-assigned > td:first-child { box-shadow: inset 3px 0 0 #1e88e5; }
+.dt-state-confirmed > td:first-child,
+.dt-state-waiting > td:first-child { box-shadow: inset 3px 0 0 #fb8c00; }
+.dt-state-draft > td:first-child { box-shadow: inset 3px 0 0 #bdbdbd; }
+
+/* Hover */
+.dt-row:hover { background: #f8f9fb; }
+.dt-row { cursor: default; }
+
+/* --- Column sizing --- */
+.dt-th-expand, .dt-td-expand { width: 36px; text-align: center; }
+.dt-th-status { width: 110px; }
+.dt-th-doc { min-width: 180px; }
+.dt-th-type { width: 80px; }
+.dt-th-progress { width: 160px; }
+.dt-th-demand, .dt-th-done { width: 80px; text-align: right; }
+.dt-th-date { width: 150px; }
+.dt-th-action { width: 48px; }
+
+.dt-td-num { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* --- Expand icon --- */
+.dt-expand-icon {
+    font-size: 0.7rem;
+    color: #868e96;
+    cursor: pointer;
+    transition: transform 0.15s, color 0.15s;
+    padding: 4px;
+}
+.dt-expand-icon:hover { color: #495057; }
+
+/* --- Status badge --- */
+.dt-badge-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+.dt-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
     flex-shrink: 0;
 }
+.st-done { color: #2e7d32; }
+.st-done .dt-dot { background: #43a047; box-shadow: 0 0 0 3px rgba(67,160,71,.12); }
+.st-assigned { color: #1565c0; }
+.st-assigned .dt-dot { background: #1e88e5; box-shadow: 0 0 0 3px rgba(30,136,229,.12); }
+.st-confirmed { color: #e65100; }
+.st-confirmed .dt-dot { background: #fb8c00; box-shadow: 0 0 0 3px rgba(251,140,0,.12); }
+.st-waiting { color: #e65100; }
+.st-waiting .dt-dot { background: #ffa726; box-shadow: 0 0 0 3px rgba(255,167,38,.12); }
+.st-draft { color: #757575; }
+.st-draft .dt-dot { background: #bdbdbd; box-shadow: 0 0 0 3px rgba(189,189,189,.12); }
 
-.delivery-card-icon.type-outgoing {
-    background: linear-gradient(135deg, #28a745, #20c997);
+/* --- Document cell --- */
+.dt-doc-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
-
-.delivery-card-icon.type-internal {
-    background: linear-gradient(135deg, #007bff, #6610f2);
+.dt-doc-icon {
+    font-size: 0.95rem;
+    width: 22px;
+    text-align: center;
+    flex-shrink: 0;
 }
+.ic-outgoing { color: #1e88e5; }
+.ic-internal { color: #fb8c00; }
+.ic-incoming { color: #43a047; }
 
-.delivery-card-icon.type-incoming {
-    background: linear-gradient(135deg, #fd7e14, #e83e8c);
-}
-
-.delivery-card-title {
+.dt-doc-text {
     display: flex;
     flex-direction: column;
+    line-height: 1.3;
 }
-
-.delivery-card-name {
-    font-weight: 700;
-    font-size: 15px;
-    color: #212529;
-    line-height: 1.2;
-}
-
-.delivery-card-stage {
-    font-size: 12px;
-    color: #6c757d;
-    margin-top: 2px;
-}
-
-/* --- Status Badge --- */
-.delivery-status-badge {
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 11px;
+.dt-doc-name {
     font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
+    color: #1565c0;
+    cursor: pointer;
+    font-size: 0.82rem;
+}
+.dt-doc-name:hover { text-decoration: underline; }
+.dt-doc-stage {
+    font-size: 0.7rem;
+    color: #868e96;
 }
 
-.delivery-status-badge.badge-success {
-    background: #d4edda;
-    color: #155724;
+/* --- Type pill --- */
+.dt-type-pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    white-space: nowrap;
 }
+.tp-outgoing { background: #e3f2fd; color: #1565c0; }
+.tp-internal { background: #fff3e0; color: #e65100; }
+.tp-incoming { background: #e8f5e9; color: #2e7d32; }
 
-.delivery-status-badge.badge-primary {
-    background: #cce5ff;
-    color: #004085;
+/* --- Progress bar --- */
+.dt-progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
-
-.delivery-status-badge.badge-warning {
-    background: #fff3cd;
-    color: #856404;
-}
-
-.delivery-status-badge.badge-info {
-    background: #d1ecf1;
-    color: #0c5460;
-}
-
-.delivery-status-badge.badge-secondary {
-    background: #e2e3e5;
-    color: #383d41;
-}
-
-/* --- Progress Bar --- */
-.delivery-card-progress {
-    padding: 0 16px;
-    margin-bottom: 8px;
-}
-
-.delivery-progress-bar-bg {
-    width: 100%;
+.dt-progress-track {
+    flex: 1;
     height: 6px;
-    background: #e9ecef;
+    background: #eceef0;
     border-radius: 3px;
     overflow: hidden;
+    min-width: 70px;
 }
-
-.delivery-progress-bar-fill {
+.dt-progress-fill {
     height: 100%;
     border-radius: 3px;
-    transition: width 0.4s ease;
+    transition: width 0.3s ease;
 }
+.pf-done { background: #43a047; }
+.pf-assigned { background: #1e88e5; }
+.pf-confirmed, .pf-waiting { background: #fb8c00; }
+.pf-draft { background: #bdbdbd; }
 
-.delivery-progress-bar-fill.fill-success {
-    background: linear-gradient(90deg, #28a745, #20c997);
-}
-
-.delivery-progress-bar-fill.fill-primary {
-    background: linear-gradient(90deg, #007bff, #6f42c1);
-}
-
-.delivery-progress-bar-fill.fill-warning {
-    background: linear-gradient(90deg, #ffc107, #fd7e14);
-}
-
-.delivery-progress-info {
-    display: flex;
-    justify-content: space-between;
-    font-size: 11px;
-    color: #868e96;
-    margin-top: 4px;
-}
-
-/* --- Card Body (Products Table) --- */
-.delivery-card-body {
-    padding: 0 16px 12px;
-}
-
-.delivery-products-table {
-    width: 100%;
-    font-size: 12px;
-    border-collapse: collapse;
-}
-
-.delivery-products-table thead th {
-    color: #868e96;
+.dt-progress-pct {
+    font-size: 0.72rem;
     font-weight: 600;
-    text-transform: uppercase;
-    font-size: 10px;
-    letter-spacing: 0.5px;
-    padding: 6px 4px;
-    border-bottom: 1px solid #e9ecef;
-}
-
-.delivery-products-table tbody td {
-    padding: 5px 4px;
     color: #495057;
-    border-bottom: 1px solid #f1f3f5;
+    min-width: 32px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
 }
 
-.delivery-products-table tbody tr:last-child td {
-    border-bottom: none;
+/* --- Done value highlight --- */
+.dt-done-val { font-variant-numeric: tabular-nums; }
+.dv-complete { color: #2e7d32; font-weight: 600; }
+.dv-partial { color: #e65100; font-weight: 500; }
+
+/* --- Dates --- */
+.dt-td-date { white-space: nowrap; font-size: 0.78rem; }
+.dt-date-done { color: #2e7d32; }
+.dt-date-done i { margin-right: 4px; font-size: 0.72rem; }
+.dt-date-sched { color: #868e96; }
+.dt-date-sched i { margin-right: 4px; font-size: 0.72rem; }
+
+/* --- Action button --- */
+.dt-btn-open {
+    background: none;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 3px 7px;
+    color: #6c757d;
+    cursor: pointer;
+    transition: all 0.12s;
+    font-size: 0.78rem;
+}
+.dt-btn-open:hover {
+    background: #f1f3f5;
+    color: #343a40;
+    border-color: #ced4da;
 }
 
-.delivery-products-table .col-product {
-    max-width: 180px;
+/* ==========================
+   EXPANDED SUB-ROWS
+   ========================== */
+.dt-sub-header td {
+    padding: 4px 12px;
+    background: #f9fafb;
+    border-bottom: 1px solid #eceef0;
+}
+.dt-sub-header td:first-child { padding-left: 24px; }
+.dt-sub-th {
+    font-size: 0.68rem !important;
+    font-weight: 600 !important;
+    color: #868e96 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+.dt-sub-th.dt-num { text-align: right; }
+
+.dt-sub-row td {
+    padding: 5px 12px;
+    background: #fcfcfd;
+    font-size: 0.79rem;
+    color: #495057;
+}
+.dt-sub-row td:first-child { padding-left: 24px; }
+.dt-sub-row:hover td { background: #f4f5f7; }
+.dt-sub-row:last-child td { border-bottom: 1px solid #e0e4e8; }
+
+.dt-sub-product {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 400px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+.dt-sub-icon { font-size: 0.68rem; color: #adb5bd; }
+.dt-sub-uom { color: #868e96; font-size: 0.75rem; }
+.dt-sub-num { text-align: right; font-variant-numeric: tabular-nums; }
 
-.delivery-products-table .col-qty {
-    text-align: right;
-    white-space: nowrap;
-}
-
-/* --- Card Footer --- */
-.delivery-card-footer {
-    padding: 8px 16px;
-    background: #f8f9fa;
-    border-top: 1px solid #e9ecef;
+/* Mini progress for sub-rows */
+.dt-mini-progress-wrap {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    font-size: 11px;
-    color: #868e96;
+}
+.dt-mini-progress-track {
+    width: 60px;
+    height: 4px;
+    background: #eceef0;
+    border-radius: 2px;
+    overflow: hidden;
+}
+.dt-mini-progress-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.3s ease;
 }
 
-.delivery-card-footer a {
-    color: #007bff;
-    font-weight: 600;
-    text-decoration: none;
-    font-size: 12px;
-}
-
-.delivery-card-footer a:hover {
-    text-decoration: underline;
-}
-
-/* ============================================
-   SUMMARY BADGE (in form header)
-   ============================================ */
-
-.delivery-summary-badge-widget {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 13px;
-    font-weight: 600;
-    white-space: nowrap;
-}
-
-.delivery-summary-badge-widget.summary-done {
-    background: #d4edda;
-    color: #155724;
-}
-
-.delivery-summary-badge-widget.summary-progress {
-    background: #cce5ff;
-    color: #004085;
-}
-
-.delivery-summary-badge-widget.summary-empty {
-    background: #f8f9fa;
-    color: #868e96;
-}
-
-/* ============================================
+/* ==========================
    RESPONSIVE
-   ============================================ */
-
+   ========================== */
 @media (max-width: 768px) {
-    .delivery-tracker-grid {
-        grid-template-columns: 1fr;
+    .dt-header {
+        flex-direction: column;
+        gap: 8px;
+        align-items: flex-start;
+        padding: 0 12px 10px 12px;
     }
+    .dt-table-container { overflow-x: auto; }
+    .dt-th-progress, .dt-td-progress { display: none; }
+    .dt-th-type, .dt-td-type { display: none; }
+    .dt-table thead th:first-child,
+    .dt-table tbody td:first-child { padding-left: 12px; }
+    .dt-table thead th:last-child,
+    .dt-table tbody td:last-child { padding-right: 12px; }
+    .dt-empty { margin: 0 12px; }
 }
