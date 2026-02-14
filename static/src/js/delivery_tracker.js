@@ -11,56 +11,73 @@ class DeliveryTrackerWidget extends Component {
 
     setup() {
         this.actionService = useService("action");
-        const parsed = this._parseData(this.props.record.data[this.props.name]);
+        const data = this._parse(this.props.record.data[this.props.name]);
         this.state = useState({
-            lines: parsed,
-            summaryParts: this._buildSummary(parsed),
-            expandedRows: {},
+            lines: data.lines,
+            summary: data.summary,
+            expanded: {},
         });
-        onWillUpdateProps((nextProps) => {
-            const data = this._parseData(nextProps.record.data[nextProps.name]);
-            this.state.lines = data;
-            this.state.summaryParts = this._buildSummary(data);
+        onWillUpdateProps((next) => {
+            const d = this._parse(next.record.data[next.name]);
+            this.state.lines = d.lines;
+            this.state.summary = d.summary;
         });
     }
 
-    _parseData(value) {
+    _defaultSummary() {
+        return { total: 0, done: 0, active: 0, draft: 0, all_done: false };
+    }
+
+    _parse(value) {
+        const empty = { lines: [], summary: this._defaultSummary() };
         try {
-            if (!value) return [];
-            return JSON.parse(value);
-        } catch (e) {
-            return [];
+            if (!value || value === "false") return empty;
+            const parsed = JSON.parse(value);
+            return {
+                lines: parsed.lines || [],
+                summary: Object.assign(this._defaultSummary(), parsed.summary || {}),
+            };
+        } catch {
+            return empty;
         }
     }
 
-    _buildSummary(lines) {
-        if (!lines.length) return [];
-        const done = lines.filter(l => l.state === 'done').length;
-        const inProgress = lines.filter(l => ['assigned', 'confirmed', 'waiting'].includes(l.state)).length;
-        const draft = lines.filter(l => l.state === 'draft').length;
-        const parts = [];
-        if (done) parts.push({ count: done, label: 'completada(s)', cls: 'chip-done' });
-        if (inProgress) parts.push({ count: inProgress, label: 'en proceso', cls: 'chip-progress' });
-        if (draft) parts.push({ count: draft, label: 'borrador', cls: 'chip-draft' });
-        return parts;
+    toggle(id) {
+        this.state.expanded[id] = !this.state.expanded[id];
     }
 
-    toggleExpand(lineId) {
-        this.state.expandedRows[lineId] = !this.state.expandedRows[lineId];
+    isOpen(id) {
+        return !!this.state.expanded[id];
     }
 
-    isExpanded(lineId) {
-        return !!this.state.expandedRows[lineId];
-    }
-
-    async onClickPicking(pickingId) {
+    async openPicking(id) {
         await this.actionService.doAction({
-            type: 'ir.actions.act_window',
-            res_model: 'stock.picking',
-            res_id: pickingId,
-            views: [[false, 'form']],
-            target: 'current',
+            type: "ir.actions.act_window",
+            res_model: "stock.picking",
+            res_id: id,
+            views: [[false, "form"]],
+            target: "current",
         });
+    }
+
+    getProgressClass(state) {
+        const map = { done: "pg-done", assigned: "pg-ready", confirmed: "pg-confirmed", waiting: "pg-waiting" };
+        return map[state] || "pg-draft";
+    }
+
+    getStateClass(state) {
+        const map = { done: "st-done", assigned: "st-ready", confirmed: "st-confirmed", waiting: "st-waiting", draft: "st-draft" };
+        return map[state] || "st-draft";
+    }
+
+    getTypeIcon(code) {
+        const map = { outgoing: "fa-truck", internal: "fa-exchange", incoming: "fa-arrow-down" };
+        return map[code] || "fa-arrows-h";
+    }
+
+    getTypeLabel(code) {
+        const map = { outgoing: "Salida", internal: "Interno", incoming: "Entrada" };
+        return map[code] || code;
     }
 }
 
