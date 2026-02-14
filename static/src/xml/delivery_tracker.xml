@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <!-- ============================================
+         DELIVERY TRACKER WIDGET (Full cards)
+         ============================================ -->
+    <t t-name="sale_delivery_tracker.DeliveryTrackerWidget">
+        <div class="delivery-tracker-container">
+
+            <!-- Empty State -->
+            <t t-if="!state.lines.length">
+                <div class="delivery-tracker-empty">
+                    <i class="fa fa-truck"></i>
+                    <p>No hay documentos de entrega aún</p>
+                </div>
+            </t>
+
+            <!-- Cards Grid -->
+            <t t-if="state.lines.length">
+                <div class="delivery-tracker-grid">
+                    <t t-foreach="state.lines" t-as="line" t-key="line.id">
+                        <div t-attf-class="delivery-card state-#{line.state}"
+                             t-on-click="() => this.onClickPicking(line.id)">
+
+                            <!-- Card Header -->
+                            <div class="delivery-card-header">
+                                <div class="delivery-card-header-left">
+                                    <div t-attf-class="delivery-card-icon type-#{line.type_code}">
+                                        <i t-attf-class="fa #{line.icon}"></i>
+                                    </div>
+                                    <div class="delivery-card-title">
+                                        <span class="delivery-card-name" t-esc="line.name"/>
+                                        <span class="delivery-card-stage" t-esc="line.stage"/>
+                                    </div>
+                                </div>
+                                <span t-attf-class="delivery-status-badge badge-#{line.state_color}">
+                                    <t t-esc="line.state_label"/>
+                                </span>
+                            </div>
+
+                            <!-- Progress Bar -->
+                            <div class="delivery-card-progress">
+                                <div class="delivery-progress-bar-bg">
+                                    <div t-attf-class="delivery-progress-bar-fill #{getProgressClass(line)}"
+                                         t-attf-style="width: #{line.progress}%"/>
+                                </div>
+                                <div class="delivery-progress-info">
+                                    <span><t t-esc="line.progress"/>% completado</span>
+                                    <span>
+                                        <t t-esc="line.total_done"/> / <t t-esc="line.total_demand"/> uds
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Products Detail Table -->
+                            <div class="delivery-card-body">
+                                <table class="delivery-products-table">
+                                    <thead>
+                                        <tr>
+                                            <th class="col-product">Producto</th>
+                                            <th class="col-qty">Demanda</th>
+                                            <th class="col-qty">Hecho</th>
+                                            <th class="col-qty">UdM</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="line.products" t-as="prod" t-key="prod.product">
+                                            <tr>
+                                                <td class="col-product" t-att-title="prod.product">
+                                                    <t t-esc="prod.product"/>
+                                                </td>
+                                                <td class="col-qty" t-esc="prod.demand"/>
+                                                <td class="col-qty" t-esc="prod.done"/>
+                                                <td class="col-qty" t-esc="prod.uom"/>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Card Footer -->
+                            <div class="delivery-card-footer">
+                                <span>
+                                    <i class="fa fa-calendar-o me-1"></i>
+                                    <t t-if="line.date_done">
+                                        <t t-esc="line.date_done"/>
+                                    </t>
+                                    <t t-else="">
+                                        Programado: <t t-esc="line.scheduled_date"/>
+                                    </t>
+                                </span>
+                                <a t-on-click.stop="() => this.onClickPicking(line.id)">
+                                    Ver documento <i class="fa fa-external-link"></i>
+                                </a>
+                            </div>
+
+                        </div>
+                    </t>
+                </div>
+            </t>
+
+        </div>
+    </t>
+
+    <!-- ============================================
+         DELIVERY SUMMARY BADGE (Header)
+         ============================================ -->
+    <t t-name="sale_delivery_tracker.DeliverySummaryBadge">
+        <div t-if="state.summary" t-attf-class="delivery-summary-badge-widget #{badgeClass}">
+            <i t-attf-class="fa #{badgeIcon}"></i>
+            <span t-esc="state.summary"/>
+        </div>
+    </t>
+
+</templates>

@@ -1,0 +1,303 @@
+/* ============================================
+   SALE DELIVERY TRACKER - Main Styles
+   ============================================ */
+
+.delivery-tracker-container {
+    padding: 16px;
+    background: #fafbfc;
+    border-radius: 8px;
+}
+
+.delivery-tracker-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: #868e96;
+}
+
+.delivery-tracker-empty i {
+    font-size: 48px;
+    margin-bottom: 12px;
+    opacity: 0.4;
+}
+
+.delivery-tracker-empty p {
+    font-size: 14px;
+    margin: 0;
+}
+
+/* --- Card Grid --- */
+.delivery-tracker-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 16px;
+}
+
+/* --- Individual Card --- */
+.delivery-card {
+    background: white;
+    border-radius: 10px;
+    border: 1px solid #e9ecef;
+    overflow: hidden;
+    transition: box-shadow 0.2s ease, transform 0.15s ease;
+    cursor: pointer;
+}
+
+.delivery-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+/* State border top accent */
+.delivery-card.state-done {
+    border-top: 3px solid #28a745;
+}
+
+.delivery-card.state-assigned {
+    border-top: 3px solid #007bff;
+}
+
+.delivery-card.state-confirmed,
+.delivery-card.state-waiting {
+    border-top: 3px solid #ffc107;
+}
+
+.delivery-card.state-draft {
+    border-top: 3px solid #6c757d;
+}
+
+/* --- Card Header --- */
+.delivery-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px 10px;
+}
+
+.delivery-card-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.delivery-card-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: white;
+    flex-shrink: 0;
+}
+
+.delivery-card-icon.type-outgoing {
+    background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+.delivery-card-icon.type-internal {
+    background: linear-gradient(135deg, #007bff, #6610f2);
+}
+
+.delivery-card-icon.type-incoming {
+    background: linear-gradient(135deg, #fd7e14, #e83e8c);
+}
+
+.delivery-card-title {
+    display: flex;
+    flex-direction: column;
+}
+
+.delivery-card-name {
+    font-weight: 700;
+    font-size: 15px;
+    color: #212529;
+    line-height: 1.2;
+}
+
+.delivery-card-stage {
+    font-size: 12px;
+    color: #6c757d;
+    margin-top: 2px;
+}
+
+/* --- Status Badge --- */
+.delivery-status-badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.delivery-status-badge.badge-success {
+    background: #d4edda;
+    color: #155724;
+}
+
+.delivery-status-badge.badge-primary {
+    background: #cce5ff;
+    color: #004085;
+}
+
+.delivery-status-badge.badge-warning {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.delivery-status-badge.badge-info {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.delivery-status-badge.badge-secondary {
+    background: #e2e3e5;
+    color: #383d41;
+}
+
+/* --- Progress Bar --- */
+.delivery-card-progress {
+    padding: 0 16px;
+    margin-bottom: 8px;
+}
+
+.delivery-progress-bar-bg {
+    width: 100%;
+    height: 6px;
+    background: #e9ecef;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.delivery-progress-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.4s ease;
+}
+
+.delivery-progress-bar-fill.fill-success {
+    background: linear-gradient(90deg, #28a745, #20c997);
+}
+
+.delivery-progress-bar-fill.fill-primary {
+    background: linear-gradient(90deg, #007bff, #6f42c1);
+}
+
+.delivery-progress-bar-fill.fill-warning {
+    background: linear-gradient(90deg, #ffc107, #fd7e14);
+}
+
+.delivery-progress-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #868e96;
+    margin-top: 4px;
+}
+
+/* --- Card Body (Products Table) --- */
+.delivery-card-body {
+    padding: 0 16px 12px;
+}
+
+.delivery-products-table {
+    width: 100%;
+    font-size: 12px;
+    border-collapse: collapse;
+}
+
+.delivery-products-table thead th {
+    color: #868e96;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    padding: 6px 4px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.delivery-products-table tbody td {
+    padding: 5px 4px;
+    color: #495057;
+    border-bottom: 1px solid #f1f3f5;
+}
+
+.delivery-products-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.delivery-products-table .col-product {
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.delivery-products-table .col-qty {
+    text-align: right;
+    white-space: nowrap;
+}
+
+/* --- Card Footer --- */
+.delivery-card-footer {
+    padding: 8px 16px;
+    background: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #868e96;
+}
+
+.delivery-card-footer a {
+    color: #007bff;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 12px;
+}
+
+.delivery-card-footer a:hover {
+    text-decoration: underline;
+}
+
+/* ============================================
+   SUMMARY BADGE (in form header)
+   ============================================ */
+
+.delivery-summary-badge-widget {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.delivery-summary-badge-widget.summary-done {
+    background: #d4edda;
+    color: #155724;
+}
+
+.delivery-summary-badge-widget.summary-progress {
+    background: #cce5ff;
+    color: #004085;
+}
+
+.delivery-summary-badge-widget.summary-empty {
+    background: #f8f9fa;
+    color: #868e96;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+    .delivery-tracker-grid {
+        grid-template-columns: 1fr;
+    }
+}
