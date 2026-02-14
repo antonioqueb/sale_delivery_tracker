@@ -11,14 +11,27 @@ class DeliveryTrackerWidget extends Component {
 
     setup() {
         this.actionService = useService("action");
+
+        // Debug: log all available data
+        console.log("=== DELIVERY TRACKER DEBUG ===");
+        console.log("props.name:", this.props.name);
+        console.log("record.data keys:", Object.keys(this.props.record.data));
+        console.log("raw value:", this.props.record.data[this.props.name]);
+        console.log("typeof:", typeof this.props.record.data[this.props.name]);
+
         const data = this._parse(this.props.record.data[this.props.name]);
+        console.log("parsed data:", JSON.stringify(data));
+
         this.state = useState({
             lines: data.lines,
             summary: data.summary,
             expanded: {},
         });
         onWillUpdateProps((next) => {
+            console.log("=== TRACKER UPDATE ===");
+            console.log("new raw value:", next.record.data[next.name]);
             const d = this._parse(next.record.data[next.name]);
+            console.log("new parsed:", JSON.stringify(d));
             this.state.lines = d.lines;
             this.state.summary = d.summary;
         });
@@ -31,15 +44,50 @@ class DeliveryTrackerWidget extends Component {
     _parse(value) {
         const empty = { lines: [], summary: this._defaultSummary() };
         try {
-            if (!value || value === "false") return empty;
-            const parsed = JSON.parse(value);
-            return {
-                lines: parsed.lines || [],
-                summary: Object.assign(this._defaultSummary(), parsed.summary || {}),
-            };
-        } catch {
+            console.log("_parse input:", value);
+            if (!value || value === "false" || value === false) return empty;
+
+            // Si ya es un objeto (Odoo a veces parsea automáticamente)
+            let parsed = value;
+            if (typeof value === "string") {
+                parsed = JSON.parse(value);
+            }
+
+            console.log("_parse parsed type:", typeof parsed, Array.isArray(parsed));
+            console.log("_parse parsed:", JSON.stringify(parsed).substring(0, 500));
+
+            // Si es un array directo (por si el backend manda lista plana)
+            if (Array.isArray(parsed)) {
+                console.log("_parse: got array, wrapping");
+                return {
+                    lines: parsed,
+                    summary: this._buildSummary(parsed),
+                };
+            }
+
+            // Si es objeto con lines
+            if (parsed && parsed.lines) {
+                console.log("_parse: got object with lines:", parsed.lines.length);
+                return {
+                    lines: parsed.lines,
+                    summary: Object.assign(this._defaultSummary(), parsed.summary || {}),
+                };
+            }
+
+            console.log("_parse: no lines found, returning empty");
+            return empty;
+        } catch (e) {
+            console.error("_parse error:", e);
             return empty;
         }
+    }
+
+    _buildSummary(lines) {
+        const done = lines.filter(l => l.state === "done").length;
+        const active = lines.filter(l => ["assigned", "confirmed", "waiting"].includes(l.state)).length;
+        const draft = lines.filter(l => l.state === "draft").length;
+        const total = lines.length;
+        return { total, done, active, draft, all_done: done === total && total > 0 };
     }
 
     toggle(id) {
