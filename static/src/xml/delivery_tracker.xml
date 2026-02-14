@@ -2,181 +2,133 @@
 <templates xml:space="preserve">
 
     <t t-name="sale_delivery_tracker.DeliveryTrackerWidget">
-        <div class="dt-wrapper">
+        <div class="dt-root">
 
-            <!-- Empty -->
             <t t-if="!state.lines.length">
                 <div class="dt-empty">
-                    <i class="fa fa-truck"></i>
-                    <span>No hay documentos de entrega aún</span>
+                    <i class="fa fa-truck dt-empty-icon"></i>
+                    <span>Sin entregas programadas</span>
                 </div>
             </t>
 
             <t t-if="state.lines.length">
 
-                <!-- Header -->
-                <div class="dt-header">
-                    <div class="dt-title">
-                        <i class="fa fa-cube"></i>
-                        <span>Seguimiento de Entregas</span>
-                    </div>
-                    <div class="dt-chips">
-                        <t t-foreach="state.summaryParts" t-as="part" t-key="part.label">
-                            <span t-attf-class="dt-chip #{part.cls}">
-                                <span class="dt-chip-dot"></span>
-                                <t t-esc="part.count"/>
-                                <t t-esc="part.label"/>
-                            </span>
+                <!-- Summary -->
+                <div class="dt-summary">
+                    <span class="dt-summary-label">Entregas</span>
+                    <t t-if="state.summary.all_done">
+                        <span class="dt-badge bg-done"><i class="fa fa-check"/> Todo entregado</span>
+                    </t>
+                    <t t-else="">
+                        <t t-if="state.summary.done">
+                            <span class="dt-badge bg-done"><t t-esc="state.summary.done"/> completada(s)</span>
                         </t>
-                    </div>
+                        <t t-if="state.summary.active">
+                            <span class="dt-badge bg-active"><t t-esc="state.summary.active"/> en proceso</span>
+                        </t>
+                        <t t-if="state.summary.draft">
+                            <span class="dt-badge bg-draft"><t t-esc="state.summary.draft"/> borrador</span>
+                        </t>
+                    </t>
                 </div>
 
                 <!-- Table -->
-                <div class="dt-table-container">
-                    <table class="dt-table">
-                        <thead>
-                            <tr>
-                                <th class="dt-th-expand"></th>
-                                <th class="dt-th-status">Estado</th>
-                                <th class="dt-th-doc">Documento</th>
-                                <th class="dt-th-type">Tipo</th>
-                                <th class="dt-th-progress">Progreso</th>
-                                <th class="dt-th-demand">Demanda</th>
-                                <th class="dt-th-done">Hecho</th>
-                                <th class="dt-th-date">Fecha</th>
-                                <th class="dt-th-action"></th>
+                <table class="dt-table">
+                    <thead>
+                        <tr>
+                            <th class="dt-th-toggle"></th>
+                            <th>Documento</th>
+                            <th>Tipo</th>
+                            <th>Estado</th>
+                            <th class="dt-th-progress">Progreso</th>
+                            <th class="dt-th-num">Demanda</th>
+                            <th class="dt-th-num">Hecho</th>
+                            <th>Fecha</th>
+                            <th class="dt-th-action"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="state.lines" t-as="line" t-key="line.id">
+
+                            <tr t-attf-class="dt-row #{line.state === 'done' ? 'dt-row-done' : ''}">
+                                <td class="dt-td-toggle" t-on-click.stop="() => this.toggle(line.id)">
+                                    <i t-attf-class="fa #{this.isOpen(line.id) ? 'fa-caret-down' : 'fa-caret-right'} dt-caret"></i>
+                                </td>
+                                <td class="dt-td-doc" t-on-click="() => this.openPicking(line.id)">
+                                    <span class="dt-doc-link" t-esc="line.name"/>
+                                </td>
+                                <td>
+                                    <span t-attf-class="dt-type tp-#{line.type_code}">
+                                        <i t-attf-class="fa #{this.getTypeIcon(line.type_code)}"></i>
+                                        <t t-esc="this.getTypeLabel(line.type_code)"/>
+                                    </span>
+                                </td>
+                                <td>
+                                    <span t-attf-class="dt-state #{this.getStateClass(line.state)}">
+                                        <t t-esc="line.state_label"/>
+                                    </span>
+                                </td>
+                                <td class="dt-td-progress">
+                                    <div class="dt-bar-wrap">
+                                        <div class="dt-bar">
+                                            <div t-attf-class="dt-bar-fill #{this.getProgressClass(line.state)}"
+                                                 t-attf-style="width:#{line.progress}%"></div>
+                                        </div>
+                                        <span class="dt-bar-pct"><t t-esc="line.progress"/>%</span>
+                                    </div>
+                                </td>
+                                <td class="dt-td-num" t-esc="line.total_demand"/>
+                                <td t-attf-class="dt-td-num #{line.total_done >= line.total_demand and line.total_demand > 0 ? 'dt-num-ok' : line.total_done > 0 ? 'dt-num-partial' : ''}">
+                                    <t t-esc="line.total_done"/>
+                                </td>
+                                <td class="dt-td-date">
+                                    <t t-if="line.date_done">
+                                        <i class="fa fa-check-circle dt-icon-done"></i>
+                                        <t t-esc="line.date_done"/>
+                                    </t>
+                                    <t t-else="">
+                                        <i class="fa fa-calendar-o dt-icon-sched"></i>
+                                        <t t-esc="line.scheduled_date"/>
+                                    </t>
+                                </td>
+                                <td class="dt-td-action">
+                                    <button class="dt-btn-open" t-on-click.stop="() => this.openPicking(line.id)" title="Abrir">
+                                        <i class="fa fa-external-link"></i>
+                                    </button>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            <t t-foreach="state.lines" t-as="line" t-key="line.id">
 
-                                <!-- Main row -->
-                                <tr t-attf-class="dt-row dt-state-#{line.state}">
-                                    <!-- Expand toggle -->
-                                    <td class="dt-td-expand"
-                                        t-on-click.stop="() => this.toggleExpand(line.id)">
-                                        <i t-attf-class="fa #{this.isExpanded(line.id) ? 'fa-chevron-down' : 'fa-chevron-right'} dt-expand-icon"></i>
-                                    </td>
-                                    <!-- Status -->
-                                    <td class="dt-td-status">
-                                        <span t-attf-class="dt-badge-status st-#{line.state}">
-                                            <span class="dt-dot"></span>
-                                            <t t-esc="line.state_label"/>
-                                        </span>
-                                    </td>
-                                    <!-- Doc -->
-                                    <td class="dt-td-doc"
-                                        t-on-click="() => this.onClickPicking(line.id)">
-                                        <div class="dt-doc-cell">
-                                            <i t-attf-class="fa #{line.icon} dt-doc-icon ic-#{line.type_code}"></i>
-                                            <div class="dt-doc-text">
-                                                <span class="dt-doc-name" t-esc="line.name"/>
-                                                <span class="dt-doc-stage" t-esc="line.stage"/>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <!-- Type -->
-                                    <td class="dt-td-type">
-                                        <span t-attf-class="dt-type-pill tp-#{line.type_code}">
-                                            <t t-if="line.type_code === 'outgoing'">Salida</t>
-                                            <t t-elif="line.type_code === 'internal'">Interno</t>
-                                            <t t-elif="line.type_code === 'incoming'">Entrada</t>
-                                            <t t-else=""><t t-esc="line.type_code"/></t>
-                                        </span>
-                                    </td>
-                                    <!-- Progress -->
-                                    <td class="dt-td-progress">
-                                        <div class="dt-progress-wrap">
-                                            <div class="dt-progress-track">
-                                                <div t-attf-class="dt-progress-fill pf-#{line.state}"
-                                                     t-attf-style="width: #{line.progress}%"></div>
-                                            </div>
-                                            <span class="dt-progress-pct"><t t-esc="line.progress"/>%</span>
-                                        </div>
-                                    </td>
-                                    <!-- Demand -->
-                                    <td class="dt-td-num">
-                                        <t t-esc="line.total_demand"/>
-                                    </td>
-                                    <!-- Done -->
-                                    <td class="dt-td-num">
-                                        <span t-attf-class="dt-done-val #{line.total_done >= line.total_demand and line.total_demand > 0 ? 'dv-complete' : line.total_done > 0 ? 'dv-partial' : ''}">
-                                            <t t-esc="line.total_done"/>
-                                        </span>
-                                    </td>
-                                    <!-- Date -->
-                                    <td class="dt-td-date">
-                                        <t t-if="line.date_done">
-                                            <span class="dt-date-done">
-                                                <i class="fa fa-check-circle"></i>
-                                                <t t-esc="line.date_done"/>
-                                            </span>
-                                        </t>
-                                        <t t-else="">
-                                            <span class="dt-date-sched">
-                                                <i class="fa fa-calendar-o"></i>
-                                                <t t-esc="line.scheduled_date"/>
-                                            </span>
-                                        </t>
-                                    </td>
-                                    <!-- Action -->
-                                    <td class="dt-td-action">
-                                        <button class="dt-btn-open"
-                                                t-on-click.stop="() => this.onClickPicking(line.id)"
-                                                title="Abrir documento">
-                                            <i class="fa fa-external-link"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <!-- Expanded product detail rows -->
-                                <t t-if="this.isExpanded(line.id)">
-                                    <!-- Sub-header -->
-                                    <tr class="dt-sub-header">
+                            <!-- Expanded products -->
+                            <t t-if="this.isOpen(line.id)">
+                                <t t-foreach="line.products" t-as="p" t-key="p.name + '_' + p_index">
+                                    <tr class="dt-sub-row">
                                         <td></td>
-                                        <td colspan="2" class="dt-sub-th">Producto</td>
-                                        <td class="dt-sub-th">UdM</td>
-                                        <td class="dt-sub-th"></td>
-                                        <td class="dt-sub-th dt-num">Demanda</td>
-                                        <td class="dt-sub-th dt-num">Hecho</td>
+                                        <td class="dt-sub-product" t-att-title="p.name">
+                                            <i class="fa fa-cube dt-sub-icon"></i>
+                                            <t t-esc="p.name"/>
+                                        </td>
+                                        <td class="dt-sub-muted" t-esc="p.uom"/>
+                                        <td></td>
+                                        <td class="dt-td-progress">
+                                            <div class="dt-bar-wrap">
+                                                <div class="dt-bar dt-bar-sm">
+                                                    <div t-attf-class="dt-bar-fill #{this.getProgressClass(line.state)}"
+                                                         t-attf-style="width:#{p.progress}%"></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="dt-td-num" t-esc="p.demand"/>
+                                        <td t-attf-class="dt-td-num #{p.done >= p.demand and p.demand > 0 ? 'dt-num-ok' : p.done > 0 ? 'dt-num-partial' : ''}">
+                                            <t t-esc="p.done"/>
+                                        </td>
                                         <td colspan="2"></td>
                                     </tr>
-                                    <t t-foreach="line.products" t-as="prod" t-key="prod.product">
-                                        <tr class="dt-sub-row">
-                                            <td></td>
-                                            <td colspan="2" class="dt-sub-product" t-att-title="prod.product">
-                                                <i class="fa fa-cube dt-sub-icon"></i>
-                                                <t t-esc="prod.product"/>
-                                            </td>
-                                            <td class="dt-sub-uom">
-                                                <t t-esc="prod.uom"/>
-                                            </td>
-                                            <td>
-                                                <!-- Mini progress per product -->
-                                                <div class="dt-mini-progress-wrap">
-                                                    <div class="dt-mini-progress-track">
-                                                        <div t-attf-class="dt-mini-progress-fill pf-#{line.state}"
-                                                             t-attf-style="width: #{prod.demand > 0 ? Math.min(100, Math.round((prod.done / prod.demand) * 100)) : 0}%"></div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td class="dt-sub-num">
-                                                <t t-esc="prod.demand"/>
-                                            </td>
-                                            <td class="dt-sub-num">
-                                                <span t-attf-class="dt-done-val #{prod.done >= prod.demand and prod.demand > 0 ? 'dv-complete' : prod.done > 0 ? 'dv-partial' : ''}">
-                                                    <t t-esc="prod.done"/>
-                                                </span>
-                                            </td>
-                                            <td colspan="2"></td>
-                                        </tr>
-                                    </t>
                                 </t>
-
                             </t>
-                        </tbody>
-                    </table>
-                </div>
+
+                        </t>
+                    </tbody>
+                </table>
 
             </t>
         </div>

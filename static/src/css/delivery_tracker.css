@@ -1,393 +1,277 @@
-/* =============================================
-   DELIVERY TRACKER — TABLE VIEW (Full Width)
-   
-   DOM hierarchy (from real Odoo 19):
-   .o_form_renderer.d-flex
-     └─ .o_form_sheet_bg (flex child, shares row with chatter)
-         ├─ .o_form_statusbar
-         ├─ .o_form_sheet (has max-width ~1200px, centered)
-         ├─ .dt-outer-wrap  ← our widget (after sheet)
-         └─ ...
-     └─ .o-mail-ChatterContainer (flex child, side panel)
-   
-   The sheet has max-width but dt-outer-wrap does NOT inherit it
-   since it's a sibling, not a child. The real constraint is
-   .o_form_sheet_bg's padding.
-   ============================================= */
+/* ============================================================
+   Sale Delivery Tracker — Traditional List
+   ============================================================ */
 
-/* --- Force dt-outer-wrap to span full width of sheet_bg --- */
-.dt-outer-wrap {
-    width: auto;
-    margin-left: -24px;
-    margin-right: -24px;
-    padding: 0;
-}
-
-/* Also handle when sheet_bg has different padding */
-.o_form_sheet_bg > .dt-outer-wrap {
-    margin-left: calc(-1 * var(--o-form-gap, 24px));
-    margin-right: calc(-1 * var(--o-form-gap, 24px));
-}
-
-/* --- Wrapper --- */
-.dt-wrapper {
-    margin-top: 4px;
-    margin-bottom: 0;
+.dt-root {
     width: 100%;
-    background: #fff;
-    border-top: 1px solid #dee2e6;
-    padding-top: 12px;
+    margin: 12px 0 4px 0;
+    font-size: 13px;
+    color: #374151;
 }
 
-/* --- Empty --- */
+/* ---- Empty ---- */
 .dt-empty {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 24px 16px;
-    color: #9e9e9e;
-    font-size: 0.88rem;
-    border: 1px dashed #dde1e6;
-    border-radius: 8px;
-    background: #fafbfc;
-    margin: 0 24px 12px;
+    gap: 8px;
+    padding: 16px;
+    color: #9ca3af;
+    border: 1px dashed #d1d5db;
+    border-radius: 4px;
 }
-.dt-empty i { font-size: 1.3rem; color: #bdbdbd; }
+.dt-empty-icon { font-size: 16px; opacity: .5; }
 
-/* --- Header --- */
-.dt-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 24px 10px 24px;
-}
-.dt-title {
+/* ---- Summary ---- */
+.dt-summary {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-weight: 600;
-    font-size: 0.92rem;
-    color: #343a40;
+    padding: 6px 0 10px 0;
 }
-.dt-title i { color: #6c757d; }
-
-.dt-chips { display: flex; gap: 6px; }
-.dt-chip {
+.dt-summary-label {
+    font-weight: 600;
+    font-size: 14px;
+    color: #111827;
+}
+.dt-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
     display: inline-flex;
     align-items: center;
-    gap: 5px;
-    padding: 2px 10px;
-    border-radius: 20px;
-    font-size: 0.73rem;
-    font-weight: 500;
+    gap: 4px;
 }
-.dt-chip-dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-}
-.chip-done { background: #e8f5e9; color: #2e7d32; }
-.chip-done .dt-chip-dot { background: #43a047; }
-.chip-progress { background: #e3f2fd; color: #1565c0; }
-.chip-progress .dt-chip-dot { background: #1e88e5; }
-.chip-draft { background: #f5f5f5; color: #757575; }
-.chip-draft .dt-chip-dot { background: #9e9e9e; }
+.bg-done   { background: #dcfce7; color: #166534; }
+.bg-active { background: #dbeafe; color: #1e40af; }
+.bg-draft  { background: #f3f4f6; color: #6b7280; }
 
-/* --- Table Container --- */
-.dt-table-container {
-    width: 100%;
-    background: #fff;
-    border-top: 1px solid #e0e4e8;
-    border-bottom: 1px solid #e0e4e8;
-    overflow-x: auto;
-}
-
-/* --- Table --- */
+/* ---- Table ---- */
 .dt-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.82rem;
-    line-height: 1.5;
-    table-layout: auto;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    overflow: hidden;
 }
 
-/* Thead */
-.dt-table thead {
-    background: #f5f6f8;
-    border-bottom: 2px solid #e0e4e8;
+.dt-table thead tr {
+    background: #f9fafb;
+    border-bottom: 2px solid #e5e7eb;
 }
 .dt-table thead th {
-    padding: 8px 12px;
+    padding: 8px 10px;
+    font-size: 11px;
     font-weight: 600;
-    font-size: 0.72rem;
-    color: #6c757d;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
-    white-space: nowrap;
+    letter-spacing: .4px;
+    color: #6b7280;
     text-align: left;
+    white-space: nowrap;
 }
-.dt-table thead th:first-child { padding-left: 24px; }
-.dt-table thead th:last-child { padding-right: 24px; }
 
-/* Tbody */
-.dt-table tbody tr {
-    border-bottom: 1px solid #f0f2f4;
-    transition: background 0.12s;
-}
-.dt-table tbody tr:last-child { border-bottom: none; }
-.dt-table tbody td {
-    padding: 7px 12px;
-    vertical-align: middle;
-    color: #343a40;
-}
-.dt-table tbody td:first-child { padding-left: 24px; }
-.dt-table tbody td:last-child { padding-right: 24px; }
-
-/* --- State left accent --- */
-.dt-state-done > td:first-child { box-shadow: inset 3px 0 0 #43a047; }
-.dt-state-assigned > td:first-child { box-shadow: inset 3px 0 0 #1e88e5; }
-.dt-state-confirmed > td:first-child,
-.dt-state-waiting > td:first-child { box-shadow: inset 3px 0 0 #fb8c00; }
-.dt-state-draft > td:first-child { box-shadow: inset 3px 0 0 #bdbdbd; }
-
-/* Hover */
-.dt-row:hover { background: #f8f9fb; }
-.dt-row { cursor: default; }
-
-/* --- Column sizing --- */
-.dt-th-expand, .dt-td-expand { width: 36px; text-align: center; }
-.dt-th-status { width: 110px; }
-.dt-th-doc { min-width: 180px; }
-.dt-th-type { width: 80px; }
+/* Column widths */
+.dt-th-toggle { width: 32px; }
 .dt-th-progress { width: 160px; }
-.dt-th-demand, .dt-th-done { width: 80px; text-align: right; }
-.dt-th-date { width: 150px; }
-.dt-th-action { width: 48px; }
+.dt-th-num { width: 72px; text-align: right; }
+.dt-th-action { width: 36px; }
 
-.dt-td-num { text-align: right; font-variant-numeric: tabular-nums; }
-
-/* --- Expand icon --- */
-.dt-expand-icon {
-    font-size: 0.7rem;
-    color: #868e96;
-    cursor: pointer;
-    transition: transform 0.15s, color 0.15s;
-    padding: 4px;
+/* ---- Rows ---- */
+.dt-row {
+    border-bottom: 1px solid #f3f4f6;
+    transition: background .1s;
 }
-.dt-expand-icon:hover { color: #495057; }
+.dt-row:hover {
+    background: #f9fafb;
+}
+.dt-row-done {
+    background: #fafff9;
+}
+.dt-row td {
+    padding: 8px 10px;
+    vertical-align: middle;
+}
 
-/* --- Status badge --- */
-.dt-badge-status {
+/* Toggle */
+.dt-td-toggle {
+    cursor: pointer;
+    text-align: center;
+    width: 32px;
+}
+.dt-caret {
+    color: #9ca3af;
+    font-size: 12px;
+}
+.dt-td-toggle:hover .dt-caret {
+    color: #374151;
+}
+
+/* Document link */
+.dt-td-doc {
+    cursor: pointer;
+}
+.dt-doc-link {
+    font-weight: 600;
+    color: #1d4ed8;
+}
+.dt-doc-link:hover {
+    text-decoration: underline;
+}
+
+/* Type pill */
+.dt-type {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    font-size: 0.78rem;
-    font-weight: 500;
-    white-space: nowrap;
-}
-.dt-dot {
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    flex-shrink: 0;
-}
-.st-done { color: #2e7d32; }
-.st-done .dt-dot { background: #43a047; box-shadow: 0 0 0 3px rgba(67,160,71,.12); }
-.st-assigned { color: #1565c0; }
-.st-assigned .dt-dot { background: #1e88e5; box-shadow: 0 0 0 3px rgba(30,136,229,.12); }
-.st-confirmed { color: #e65100; }
-.st-confirmed .dt-dot { background: #fb8c00; box-shadow: 0 0 0 3px rgba(251,140,0,.12); }
-.st-waiting { color: #e65100; }
-.st-waiting .dt-dot { background: #ffa726; box-shadow: 0 0 0 3px rgba(255,167,38,.12); }
-.st-draft { color: #757575; }
-.st-draft .dt-dot { background: #bdbdbd; box-shadow: 0 0 0 3px rgba(189,189,189,.12); }
-
-/* --- Document cell --- */
-.dt-doc-cell {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-.dt-doc-icon {
-    font-size: 0.95rem;
-    width: 22px;
-    text-align: center;
-    flex-shrink: 0;
-}
-.ic-outgoing { color: #1e88e5; }
-.ic-internal { color: #fb8c00; }
-.ic-incoming { color: #43a047; }
-
-.dt-doc-text {
-    display: flex;
-    flex-direction: column;
-    line-height: 1.3;
-}
-.dt-doc-name {
-    font-weight: 600;
-    color: #1565c0;
-    cursor: pointer;
-    font-size: 0.82rem;
-}
-.dt-doc-name:hover { text-decoration: underline; }
-.dt-doc-stage {
-    font-size: 0.7rem;
-    color: #868e96;
-}
-
-/* --- Type pill --- */
-.dt-type-pill {
-    display: inline-block;
+    gap: 5px;
+    font-size: 12px;
     padding: 2px 8px;
     border-radius: 4px;
-    font-size: 0.72rem;
     font-weight: 500;
     white-space: nowrap;
 }
-.tp-outgoing { background: #e3f2fd; color: #1565c0; }
-.tp-internal { background: #fff3e0; color: #e65100; }
-.tp-incoming { background: #e8f5e9; color: #2e7d32; }
+.tp-outgoing { background: #eff6ff; color: #1e40af; }
+.tp-internal { background: #f5f3ff; color: #5b21b6; }
+.tp-incoming { background: #fef3c7; color: #92400e; }
 
-/* --- Progress bar --- */
-.dt-progress-wrap {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-.dt-progress-track {
-    flex: 1;
-    height: 6px;
-    background: #eceef0;
-    border-radius: 3px;
-    overflow: hidden;
-    min-width: 70px;
-}
-.dt-progress-fill {
-    height: 100%;
-    border-radius: 3px;
-    transition: width 0.3s ease;
-}
-.pf-done { background: #43a047; }
-.pf-assigned { background: #1e88e5; }
-.pf-confirmed, .pf-waiting { background: #fb8c00; }
-.pf-draft { background: #bdbdbd; }
-
-.dt-progress-pct {
-    font-size: 0.72rem;
+/* State badge */
+.dt-state {
+    display: inline-block;
+    font-size: 11.5px;
     font-weight: 600;
-    color: #495057;
-    min-width: 32px;
-    text-align: right;
-    font-variant-numeric: tabular-nums;
+    padding: 2px 10px;
+    border-radius: 10px;
+    white-space: nowrap;
 }
+.st-done      { background: #dcfce7; color: #166534; }
+.st-ready     { background: #dbeafe; color: #1e40af; }
+.st-confirmed { background: #ede9fe; color: #5b21b6; }
+.st-waiting   { background: #fef3c7; color: #92400e; }
+.st-draft     { background: #f3f4f6; color: #6b7280; }
 
-/* --- Done value highlight --- */
-.dt-done-val { font-variant-numeric: tabular-nums; }
-.dv-complete { color: #2e7d32; font-weight: 600; }
-.dv-partial { color: #e65100; font-weight: 500; }
-
-/* --- Dates --- */
-.dt-td-date { white-space: nowrap; font-size: 0.78rem; }
-.dt-date-done { color: #2e7d32; }
-.dt-date-done i { margin-right: 4px; font-size: 0.72rem; }
-.dt-date-sched { color: #868e96; }
-.dt-date-sched i { margin-right: 4px; font-size: 0.72rem; }
-
-/* --- Action button --- */
-.dt-btn-open {
-    background: none;
-    border: 1px solid #dee2e6;
-    border-radius: 4px;
-    padding: 3px 7px;
-    color: #6c757d;
-    cursor: pointer;
-    transition: all 0.12s;
-    font-size: 0.78rem;
+/* Progress bar */
+.dt-td-progress {
+    padding-right: 12px !important;
 }
-.dt-btn-open:hover {
-    background: #f1f3f5;
-    color: #343a40;
-    border-color: #ced4da;
-}
-
-/* ==========================
-   EXPANDED SUB-ROWS
-   ========================== */
-.dt-sub-header td {
-    padding: 4px 12px;
-    background: #f9fafb;
-    border-bottom: 1px solid #eceef0;
-}
-.dt-sub-header td:first-child { padding-left: 24px; }
-.dt-sub-th {
-    font-size: 0.68rem !important;
-    font-weight: 600 !important;
-    color: #868e96 !important;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-}
-.dt-sub-th.dt-num { text-align: right; }
-
-.dt-sub-row td {
-    padding: 5px 12px;
-    background: #fcfcfd;
-    font-size: 0.79rem;
-    color: #495057;
-}
-.dt-sub-row td:first-child { padding-left: 24px; }
-.dt-sub-row:hover td { background: #f4f5f7; }
-.dt-sub-row:last-child td { border-bottom: 1px solid #e0e4e8; }
-
-.dt-sub-product {
+.dt-bar-wrap {
     display: flex;
     align-items: center;
     gap: 6px;
-    max-width: 400px;
+}
+.dt-bar {
+    flex: 1;
+    height: 6px;
+    background: #e5e7eb;
+    border-radius: 3px;
+    overflow: hidden;
+}
+.dt-bar-sm {
+    height: 4px;
+}
+.dt-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width .3s ease;
+}
+.dt-bar-pct {
+    font-size: 11px;
+    font-weight: 600;
+    color: #6b7280;
+    min-width: 32px;
+    text-align: right;
+}
+
+/* Progress fill colors */
+.pg-done      { background: #22c55e; }
+.pg-ready     { background: #3b82f6; }
+.pg-confirmed { background: #8b5cf6; }
+.pg-waiting   { background: #f59e0b; }
+.pg-draft     { background: #d1d5db; }
+
+/* Numbers */
+.dt-td-num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+.dt-num-ok {
+    color: #16a34a;
+    font-weight: 600;
+}
+.dt-num-partial {
+    color: #d97706;
+    font-weight: 600;
+}
+
+/* Date */
+.dt-td-date {
+    white-space: nowrap;
+    font-size: 12px;
+    color: #6b7280;
+}
+.dt-icon-done {
+    color: #22c55e;
+    margin-right: 4px;
+}
+.dt-icon-sched {
+    color: #9ca3af;
+    margin-right: 4px;
+}
+
+/* Action button */
+.dt-td-action {
+    text-align: center;
+}
+.dt-btn-open {
+    border: none;
+    background: none;
+    color: #9ca3af;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+.dt-btn-open:hover {
+    color: #3b82f6;
+    background: #eff6ff;
+}
+
+/* ---- Sub rows (products) ---- */
+.dt-sub-row {
+    background: #fafbfc;
+    border-bottom: 1px solid #f1f5f9;
+}
+.dt-sub-row td {
+    padding: 5px 10px;
+    font-size: 12px;
+    color: #475569;
+    vertical-align: middle;
+}
+.dt-sub-product {
+    max-width: 260px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    padding-left: 14px !important;
 }
-.dt-sub-icon { font-size: 0.68rem; color: #adb5bd; }
-.dt-sub-uom { color: #868e96; font-size: 0.75rem; }
-.dt-sub-num { text-align: right; font-variant-numeric: tabular-nums; }
-
-/* Mini progress for sub-rows */
-.dt-mini-progress-wrap {
-    display: flex;
-    align-items: center;
+.dt-sub-icon {
+    color: #94a3b8;
+    margin-right: 6px;
+    font-size: 10px;
 }
-.dt-mini-progress-track {
-    width: 60px;
-    height: 4px;
-    background: #eceef0;
-    border-radius: 2px;
-    overflow: hidden;
-}
-.dt-mini-progress-fill {
-    height: 100%;
-    border-radius: 2px;
-    transition: width 0.3s ease;
+.dt-sub-muted {
+    color: #94a3b8;
+    font-size: 11.5px;
 }
 
-/* ==========================
-   RESPONSIVE
-   ========================== */
+/* ---- Responsive ---- */
 @media (max-width: 768px) {
-    .dt-outer-wrap {
-        margin-left: -16px;
-        margin-right: -16px;
+    .dt-th-progress,
+    .dt-td-progress {
+        display: none;
     }
-    .dt-header {
-        flex-direction: column;
-        gap: 8px;
-        align-items: flex-start;
-        padding: 0 16px 10px 16px;
+    .dt-table thead th,
+    .dt-row td,
+    .dt-sub-row td {
+        padding: 6px 6px;
     }
-    .dt-table-container { overflow-x: auto; }
-    .dt-th-progress, .dt-td-progress { display: none; }
-    .dt-th-type, .dt-td-type { display: none; }
-    .dt-table thead th:first-child,
-    .dt-table tbody td:first-child { padding-left: 16px; }
-    .dt-table thead th:last-child,
-    .dt-table tbody td:last-child { padding-right: 16px; }
-    .dt-empty { margin: 0 16px 12px; }
 }
