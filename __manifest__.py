@@ -10,7 +10,7 @@
     """,
     'author': 'Alphaqueb Consulting',
     'website': 'https://www.alphaqueb.com',
-    'depends': ['sale_stock', 'stock'],
+    'depends': ['sale_stock', 'stock', 'stock_transit_allocation'],
     'data': [
         'security/ir.model.access.csv',
         'views/sale_order_views.xml',

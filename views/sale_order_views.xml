@@ -7,7 +7,9 @@
         <field name="inherit_id" ref="sale.view_order_form"/>
         <field name="priority">50</field>
         <field name="arch" type="xml">
-            <xpath expr="//notebook" position="after">
+            <!-- El tracker de entregas vive dentro de la pestaña Logística
+                 (creada por stock_transit_allocation), debajo de las líneas. -->
+            <xpath expr="//page[@name='logistics_lines']" position="inside">
                 <div class="o_group" style="width: 100%;">
                     <field name="delivery_tracker_data" widget="delivery_tracker_widget" nolabel="1"/>
                 </div>
