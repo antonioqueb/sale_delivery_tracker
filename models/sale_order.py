@@ -1,4 +1,5 @@
 from odoo import models, fields, api
+from odoo.addons.sale_delivery_tracker.models.som_date_format import som_format_date
 import json
 
 
@@ -187,8 +188,8 @@ class SaleOrder(models.Model):
             'state': picking.state,
             'state_label': state_info['label'],
             'state_color': state_info['color'],
-            'scheduled_date': picking.scheduled_date.strftime('%d/%m/%Y') if picking.scheduled_date else '',
-            'date_done': picking.date_done.strftime('%d/%m/%Y %H:%M') if picking.date_done else '',
+            'scheduled_date': som_format_date(picking.scheduled_date, empty=''),
+            'date_done': som_format_date(picking.date_done, empty='', with_time=True),
             'progress': progress,
             'total_demand': total_demand,
             'total_done': total_done,

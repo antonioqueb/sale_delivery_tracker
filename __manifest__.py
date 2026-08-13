@@ -1,6 +1,6 @@
 {
     'name': 'Sale Delivery Tracker',
-    'version': '19.0.1.0.0',
+    'version': '19.0.1.1.0',
     'category': 'Sales',
     'summary': 'Track delivery status directly from Sale Orders with visual indicators',
     'description': """
